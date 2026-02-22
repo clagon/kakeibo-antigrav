@@ -136,8 +136,9 @@
 <PageHeader
 	title="カレンダー"
 	rightIcon="search"
-	onRightClick={() => {
-		void goto('/search');
+	onRightClick={async () => {
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		await goto('/search');
 	}}
 />
 
