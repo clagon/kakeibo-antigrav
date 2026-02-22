@@ -2,6 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import BottomNav from '$lib/components/BottomNav.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 
 	let { children } = $props();
 </script>
@@ -14,6 +15,7 @@
 	</main>
 	<BottomNav />
 </div>
+<Toast />
 
 <style>
 	/* アプリ全体レイアウト */
