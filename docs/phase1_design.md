@@ -47,7 +47,7 @@ services:
       POSTGRES_PASSWORD: kakeibo_dev
       POSTGRES_DB: kakeibo
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -72,39 +72,42 @@ DATABASE_URL=postgresql://kakeibo:kakeibo_dev@localhost:5432/kakeibo
 `<head>` に以下を追加：
 
 ```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Sans+JP:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap"
+	rel="stylesheet"
+/>
 ```
 
 #### [MODIFY] [app.css](file:///home/clagon/repos/kakeibo-antigrav/src/app.css)
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Noto Sans JP", "Roboto", sans-serif;
-  --font-emoji: "Noto Color Emoji", sans-serif;
+	--font-sans: 'Noto Sans JP', 'Roboto', sans-serif;
+	--font-emoji: 'Noto Color Emoji', sans-serif;
 
-  /* カラーパレット（モバイル家計簿向け） */
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
+	/* カラーパレット（モバイル家計簿向け） */
+	--color-primary-50: #eff6ff;
+	--color-primary-100: #dbeafe;
+	--color-primary-500: #3b82f6;
+	--color-primary-600: #2563eb;
+	--color-primary-700: #1d4ed8;
 
-  --color-expense: #ef4444;
-  --color-income: #3b82f6;
-  --color-balance: #10b981;
+	--color-expense: #ef4444;
+	--color-income: #3b82f6;
+	--color-balance: #10b981;
 
-  --color-surface: #ffffff;
-  --color-surface-alt: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-text: #1e293b;
-  --color-text-muted: #64748b;
+	--color-surface: #ffffff;
+	--color-surface-alt: #f8fafc;
+	--color-border: #e2e8f0;
+	--color-text: #1e293b;
+	--color-text-muted: #64748b;
 
-  /* スペーシング */
-  --spacing-nav-height: 4rem;
+	/* スペーシング */
+	--spacing-nav-height: 4rem;
 }
 ```
 
@@ -115,47 +118,60 @@ DATABASE_URL=postgresql://kakeibo:kakeibo_dev@localhost:5432/kakeibo
 #### [NEW] [src/lib/server/db/schema.ts](file:///home/clagon/repos/kakeibo-antigrav/src/lib/server/db/schema.ts)
 
 ```typescript
-import { pgTable, uuid, varchar, integer, text, date, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	uuid,
+	varchar,
+	integer,
+	text,
+	date,
+	timestamp,
+	pgEnum
+} from 'drizzle-orm/pg-core';
 
 // 支出/収入の列挙型
 export const transactionTypeEnum = pgEnum('transaction_type', ['expense', 'income']);
 
 // カテゴリーテーブル
 export const categories = pgTable('categories', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  icon: varchar('icon', { length: 50 }).notNull(),
-  color: varchar('color', { length: 20 }).notNull(),
-  type: transactionTypeEnum('type').notNull(),
-  order: integer('order').notNull().default(0),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: varchar('name', { length: 100 }).notNull(),
+	icon: varchar('icon', { length: 50 }).notNull(),
+	color: varchar('color', { length: 20 }).notNull(),
+	type: transactionTypeEnum('type').notNull(),
+	order: integer('order').notNull().default(0),
+	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
 // レシートテーブル
 export const receipts = pgTable('receipts', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  date: date('date').notNull(),
-  type: transactionTypeEnum('type').notNull(),
-  memo: text('memo').default(''),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+	id: uuid('id').defaultRandom().primaryKey(),
+	date: date('date').notNull(),
+	type: transactionTypeEnum('type').notNull(),
+	memo: text('memo').default(''),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
 
 // 明細テーブル
 export const lineItems = pgTable('line_items', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  receiptId: uuid('receipt_id').references(() => receipts.id, { onDelete: 'cascade' }).notNull(),
-  categoryId: uuid('category_id').references(() => categories.id).notNull(),
-  memo: text('memo').default(''),
-  amount: integer('amount').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+	id: uuid('id').defaultRandom().primaryKey(),
+	receiptId: uuid('receipt_id')
+		.references(() => receipts.id, { onDelete: 'cascade' })
+		.notNull(),
+	categoryId: uuid('category_id')
+		.references(() => categories.id)
+		.notNull(),
+	memo: text('memo').default(''),
+	amount: integer('amount').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 
 // 設定テーブル
 export const appSettings = pgTable('app_settings', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  initialBalance: integer('initial_balance').notNull().default(0),
-  weekStartDay: integer('week_start_day').notNull().default(1), // 1=月曜
+	id: uuid('id').defaultRandom().primaryKey(),
+	initialBalance: integer('initial_balance').notNull().default(0),
+	weekStartDay: integer('week_start_day').notNull().default(1) // 1=月曜
 });
 ```
 
@@ -176,12 +192,12 @@ export default db;
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  out: './drizzle',
-  schema: './src/lib/server/db/schema.ts',
-  dialect: 'postgresql',
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-  },
+	out: './drizzle',
+	schema: './src/lib/server/db/schema.ts',
+	dialect: 'postgresql',
+	dbCredentials: {
+		url: process.env.DATABASE_URL!
+	}
 });
 ```
 
@@ -196,33 +212,33 @@ export default defineConfig({
 export type TransactionType = 'expense' | 'income';
 
 export interface CategoryData {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  type: TransactionType;
-  order: number;
+	id: string;
+	name: string;
+	icon: string;
+	color: string;
+	type: TransactionType;
+	order: number;
 }
 
 export interface LineItemData {
-  id: string;
-  receiptId: string;
-  categoryId: string;
-  memo: string;
-  amount: number;
+	id: string;
+	receiptId: string;
+	categoryId: string;
+	memo: string;
+	amount: number;
 }
 
 export interface ReceiptData {
-  id: string;
-  date: string;
-  type: TransactionType;
-  memo: string;
-  items: LineItemData[];
+	id: string;
+	date: string;
+	type: TransactionType;
+	memo: string;
+	items: LineItemData[];
 }
 
 export interface AppSettingsData {
-  initialBalance: number;
-  weekStartDay: number;
+	initialBalance: number;
+	weekStartDay: number;
 }
 ```
 

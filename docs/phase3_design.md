@@ -15,12 +15,12 @@ graph LR
   C --- D["その他 /settings"]
 ```
 
-| パス | 画面 | アイコン |
-|------|------|---------|
-| `/` | 入力 | `PencilLine` |
-| `/calendar` | カレンダー | `Calendar` |
-| `/report` | レポート | `BarChart3` |
-| `/settings` | その他 | `Settings` |
+| パス        | 画面       | アイコン     |
+| ----------- | ---------- | ------------ |
+| `/`         | 入力       | `PencilLine` |
+| `/calendar` | カレンダー | `Calendar`   |
+| `/report`   | レポート   | `BarChart3`  |
+| `/settings` | その他     | `Settings`   |
 
 ---
 
@@ -45,15 +45,19 @@ graph LR
 ### ルーティング（各画面プレースホルダー）
 
 #### [MODIFY] [+page.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/routes/+page.svelte)
+
 入力画面の仮ページ。
 
 #### [NEW] [/calendar/+page.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/routes/calendar/+page.svelte)
+
 カレンダー画面の仮ページ。
 
 #### [NEW] [/report/+page.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/routes/report/+page.svelte)
+
 レポート画面の仮ページ。
 
 #### [NEW] [/settings/+page.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/routes/settings/+page.svelte)
+
 その他画面の仮ページ。
 
 ---

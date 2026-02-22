@@ -27,6 +27,7 @@
 ```
 
 > [!IMPORTANT]
+>
 > - 日付の左右に **◀ ▶ ボタン**で1日ずつ変更可能
 > - **合計は明細リストの上**に表示
 > - 保存完了後は**入力をリセット**（日付は今日に戻す、明細クリア）+ **トースト通知**
@@ -38,9 +39,11 @@
 ### サーバー API
 
 #### [NEW] [/api/categories/+server.ts](file:///home/clagon/repos/kakeibo-antigrav/src/routes/api/categories/+server.ts)
+
 `GET` — カテゴリー一覧取得。`?type=expense|income` でフィルタ。
 
 #### [NEW] [/api/receipts/+server.ts](file:///home/clagon/repos/kakeibo-antigrav/src/routes/api/receipts/+server.ts)
+
 `POST` — レシート + 明細をトランザクションで一括保存。
 
 ---
@@ -48,28 +51,36 @@
 ### コンポーネント
 
 #### [MODIFY] [+page.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/routes/+page.svelte)
+
 入力画面本体。タブ切替、日付（±ボタン付き）、メモ、合計表示、明細リスト、保存ボタン。
 
 #### [NEW] [LineItemDrawer.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/LineItemDrawer.svelte)
+
 下からスライドするドロワー：
+
 - カテゴリーグリッド（**アイコンはカテゴリ色**、ラベルはテキスト色）
 - **テンキー風の数値入力**
 - メモ入力
 - 追加 / キャンセルボタン
 
 #### [NEW] [CategoryGrid.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/CategoryGrid.svelte)
+
 カテゴリー選択グリッド。アイコンは**カテゴリーに設定された色**で描画。
 
 #### [NEW] [LineItemList.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/LineItemList.svelte)
+
 追加済み明細リスト。編集・削除可能。
 
 #### [NEW] [NumPad.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/NumPad.svelte)
+
 テンキー風金額入力。0〜9、00、バックスペース、クリア。
 
 #### [NEW] [LucideIcon.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/LucideIcon.svelte)
+
 アイコン名→lucide-svelteコンポーネントの動的描画ラッパー。
 
 #### [NEW] [Toast.svelte](file:///home/clagon/repos/kakeibo-antigrav/src/lib/components/Toast.svelte)
+
 保存完了時のトースト通知。
 
 ---
