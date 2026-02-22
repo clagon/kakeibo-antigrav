@@ -31,6 +31,7 @@
 
 	/* レイアウト */
 	--spacing-nav-height: 4rem;
+	--spacing-app-max-width: 480px;
 }
 
 /* ベーススタイル */

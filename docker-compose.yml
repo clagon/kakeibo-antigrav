@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: kakeibo_dev
       POSTGRES_DB: kakeibo
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 

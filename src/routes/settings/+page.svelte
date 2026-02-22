@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { PencilLine } from 'lucide-svelte';
+	import { Ellipsis } from 'lucide-svelte';
 </script>
 
 <svelte:head>
-	<title>入力 | 家計簿</title>
+	<title>その他 | 家計簿</title>
 </svelte:head>
 
 <div class="page-container">
 	<header class="page-header">
-		<PencilLine size={28} />
-		<h1>入力</h1>
+		<Ellipsis size={28} />
+		<h1>その他</h1>
 	</header>
-	<p class="page-placeholder">入力画面（Phase 4で実装）</p>
+	<p class="page-placeholder">その他画面（Phase 7で実装）</p>
 </div>
 
 <style>

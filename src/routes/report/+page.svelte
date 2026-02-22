@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { PencilLine } from 'lucide-svelte';
+	import { ChartPie } from 'lucide-svelte';
 </script>
 
 <svelte:head>
-	<title>入力 | 家計簿</title>
+	<title>レポート | 家計簿</title>
 </svelte:head>
 
 <div class="page-container">
 	<header class="page-header">
-		<PencilLine size={28} />
-		<h1>入力</h1>
+		<ChartPie size={28} />
+		<h1>レポート</h1>
 	</header>
-	<p class="page-placeholder">入力画面（Phase 4で実装）</p>
+	<p class="page-placeholder">レポート画面（Phase 6で実装）</p>
 </div>
 
 <style>
