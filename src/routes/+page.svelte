@@ -4,6 +4,7 @@
 	import LineItemList from '$lib/components/LineItemList.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { showToast } from '$lib/stores/toast';
+	import { page } from '$app/stores';
 
 	/** 明細ドラフト型 */
 	interface LineItemDraft {
@@ -68,6 +69,12 @@
 	/** 初期読み込み */
 	$effect(() => {
 		fetchCategories(activeTab);
+
+		// クエリから日付を受け取る処理
+		const queryDate = $page.url.searchParams.get('date');
+		if (queryDate && !isNaN(Date.parse(queryDate))) {
+			date = queryDate;
+		}
 	});
 
 	/** 明細追加 */
