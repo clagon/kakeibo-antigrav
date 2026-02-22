@@ -213,7 +213,7 @@
 
 	.receipt-card-wrapper {
 		background-color: var(--color-surface);
-		border-radius: 0.75rem;
+		border-radius: 0.5rem;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 		overflow: hidden;
 	}
@@ -229,7 +229,6 @@
 		cursor: pointer;
 		transition: background-color 0.1s;
 		text-align: left;
-		border-radius: 0.75rem;
 		/* フォーカス時にスティッキーヘッダーと下部ナビに隠れないようにマージンを設定 */
 		scroll-margin-top: calc(3.5rem + var(--sticky-header-height, 0px) + 0.5rem);
 		scroll-margin-bottom: 4.5rem;
@@ -249,7 +248,6 @@
 	.receipt-header.expanded {
 		background-color: var(--color-surface-alt);
 		border-bottom: 1px dashed var(--color-border);
-		border-radius: 0.75rem 0.75rem 0 0;
 	}
 
 	.receipt-icon {

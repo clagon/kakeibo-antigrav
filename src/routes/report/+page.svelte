@@ -1,21 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 	import ReportChart from '$lib/components/report/ReportChart.svelte';
 	import CategoryBreakdownList from '$lib/components/report/CategoryBreakdownList.svelte';
+	import type { CategoryBreakdown } from '$lib/components/report/CategoryBreakdownList.svelte';
 	import MonthSummary from '$lib/components/calendar/MonthSummary.svelte';
 	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
-
-	// ---- 型定義 ----
-	interface CategoryBreakdown {
-		categoryId: string;
-		name: string;
-		icon: string;
-		color: string;
-		amount: number;
-		percent: number;
-	}
 
 	interface TimeSeriesItem {
 		label: string;
@@ -109,11 +101,23 @@
 
 	onMount(() => fetchAll());
 
+	// ---- カテゴリー選択 → 別ルートへ遷移 ----
+	function openCategory(cat: CategoryBreakdown) {
+		const p = new SvelteURLSearchParams({ mode, type: txType, name: cat.name, color: cat.color });
+		if (mode === 'month') {
+			p.set('year', String(year));
+			p.set('month', String(month));
+		} else if (mode === 'year') {
+			p.set('year', String(year));
+		}
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(`/report/category/${cat.categoryId}?${p}`);
+	}
+
 	// ---- モード変更 ----
 	function setMode(m: Mode) {
 		mode = m;
 	}
-
 	function setTxType(t: TxType) {
 		txType = t;
 	}
@@ -201,25 +205,6 @@
 		{/if}
 	</div>
 
-	<!-- 収支サマリー -->
-	<div class="summary-wrapper">
-		<MonthSummary income={incomeTotal} expense={expenseTotal} />
-	</div>
-
-	<!-- 支出/収入タブ -->
-	<div class="type-tab-row">
-		<button
-			class="type-tab-btn"
-			class:active-expense={txType === 'expense'}
-			onclick={() => setTxType('expense')}>支出</button
-		>
-		<button
-			class="type-tab-btn"
-			class:active-income={txType === 'income'}
-			onclick={() => setTxType('income')}>収入</button
-		>
-	</div>
-
 	<!-- コンテンツ -->
 	{#if loading}
 		<div class="loading">読み込み中…</div>
@@ -228,6 +213,24 @@
 			<p class="empty-text">データがありません</p>
 		</div>
 	{:else}
+		<!-- 収支サマリー -->
+		<div class="summary-wrapper">
+			<MonthSummary income={incomeTotal} expense={expenseTotal} />
+		</div>
+
+		<!-- 支出/収入タブ -->
+		<div class="type-tab-row">
+			<button
+				class="type-tab-btn"
+				class:active-expense={txType === 'expense'}
+				onclick={() => setTxType('expense')}>支出</button
+			>
+			<button
+				class="type-tab-btn"
+				class:active-income={txType === 'income'}
+				onclick={() => setTxType('income')}>収入</button
+			>
+		</div>
 		<!-- 棒グラフ（推移） -->
 		<section class="chart-section">
 			<h2 class="section-title">推移</h2>
@@ -255,7 +258,7 @@
 		<!-- 内訳リスト -->
 		<section class="breakdown-section">
 			<h2 class="section-title">内訳</h2>
-			<CategoryBreakdownList items={reportData.categoryBreakdown} />
+			<CategoryBreakdownList items={reportData.categoryBreakdown} onSelect={openCategory} />
 		</section>
 	{/if}
 </div>
@@ -268,7 +271,6 @@
 		gap: 0;
 	}
 
-	/* ---- スティッキーヘッダー ---- */
 	.sticky-header {
 		position: sticky;
 		top: 3.5rem; /* PageHeader の高さ分オフセット */

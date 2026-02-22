@@ -1,7 +1,8 @@
 <script lang="ts">
 	import LucideIcon from '$lib/components/LucideIcon.svelte';
+	import { ChevronRight } from 'lucide-svelte';
 
-	interface CategoryBreakdown {
+	export interface CategoryBreakdown {
 		categoryId: string;
 		name: string;
 		icon: string;
@@ -12,9 +13,10 @@
 
 	interface Props {
 		items: CategoryBreakdown[];
+		onSelect?: (item: CategoryBreakdown) => void;
 	}
 
-	let { items }: Props = $props();
+	let { items, onSelect }: Props = $props();
 
 	// 金額フォーマット
 	const fmt = new Intl.NumberFormat('ja-JP');
@@ -23,7 +25,12 @@
 <ul class="breakdown-list">
 	{#each items as item (item.categoryId)}
 		<li class="breakdown-item">
-			<div class="item-header">
+			<button
+				class="item-header"
+				onclick={() => onSelect?.(item)}
+				disabled={!onSelect}
+				aria-label="{item.name}の詳細を表示"
+			>
 				<!-- アイコン -->
 				<span class="icon-wrapper" style:background-color={item.color + '22'}>
 					<LucideIcon name={item.icon} size={18} color={item.color} />
@@ -34,7 +41,11 @@
 				<span class="item-percent">{item.percent}%</span>
 				<!-- 金額 -->
 				<span class="item-amount">¥{fmt.format(item.amount)}</span>
-			</div>
+				<!-- 矢印（onSelect があるときだけ） -->
+				{#if onSelect}
+					<span class="chevron"><ChevronRight size={16} /></span>
+				{/if}
+			</button>
 			<!-- カラーバー -->
 			<div class="bar-track">
 				<div
@@ -67,6 +78,20 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		background: none;
+		border: none;
+		padding: 0;
+		width: 100%;
+		cursor: pointer;
+		text-align: left;
+	}
+
+	.item-header:disabled {
+		cursor: default;
+	}
+
+	.item-header:not(:disabled):active {
+		opacity: 0.7;
 	}
 
 	.icon-wrapper {
@@ -98,6 +123,12 @@
 		color: var(--color-text);
 		width: 6rem;
 		text-align: right;
+	}
+
+	.chevron {
+		color: var(--color-text-muted);
+		display: flex;
+		align-items: center;
 	}
 
 	.bar-track {
