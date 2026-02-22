@@ -3,34 +3,60 @@
 
 	interface Props {
 		title: string;
+		leftIcon?: string;
+		onLeftClick?: () => void;
 		rightIcon?: string;
 		onRightClick?: () => void;
 	}
 
-	const { title, rightIcon, onRightClick }: Props = $props();
+	const { title, leftIcon, onLeftClick, rightIcon, onRightClick }: Props = $props();
 </script>
 
 <header class="page-header">
+	<div class="left-section">
+		{#if leftIcon && onLeftClick}
+			<button class="header-action" onclick={onLeftClick} aria-label="Back">
+				<LucideIcon name={leftIcon} size={24} color="var(--color-text)" />
+			</button>
+		{/if}
+	</div>
 	<h1 class="page-title">{title}</h1>
-	{#if rightIcon && onRightClick}
-		<button class="header-action" onclick={onRightClick} aria-label="Action">
-			<LucideIcon name={rightIcon} size={20} color="var(--color-expense)" />
-		</button>
-	{/if}
+	<div class="right-section">
+		{#if rightIcon && onRightClick}
+			<button class="header-action" onclick={onRightClick} aria-label="Action">
+				<LucideIcon name={rightIcon} size={20} color="var(--color-expense)" />
+			</button>
+		{/if}
+	</div>
 </header>
 
 <style>
 	.page-header {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1.25rem;
+		padding: 0 1.25rem;
 		background-color: var(--color-surface);
 		border-bottom: 1px solid var(--color-border);
 		position: sticky;
 		top: 0;
 		z-index: 10;
 		height: 3.5rem;
+		gap: 0.75rem;
+	}
+
+	.left-section {
+		display: flex;
+		align-items: center;
+	}
+
+	.left-section:empty {
+		display: none;
+	}
+
+	.right-section {
+		display: flex;
+		align-items: center;
+		margin-left: auto;
 	}
 
 	.page-title {
@@ -38,6 +64,9 @@
 		font-weight: 700;
 		color: var(--color-text);
 		margin: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.header-action {

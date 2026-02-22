@@ -44,7 +44,9 @@
 	<!-- 金額表示 -->
 	<div class="numpad-display">
 		<span class="currency">¥</span>
-		<span class="amount">{display || '0'}</span>
+		<span class="amount"
+			>{display ? new Intl.NumberFormat('ja-JP').format(Number(display)) : '0'}</span
+		>
 	</div>
 
 	<!-- テンキーグリッド -->

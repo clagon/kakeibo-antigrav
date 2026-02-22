@@ -7,14 +7,28 @@
 	} from '$lib/components/calendar/ReceiptAccordionList.svelte';
 	import MonthPickerModal from '$lib/components/calendar/MonthPickerModal.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
+	import { page } from '$app/stores';
 
 	// 状態管理
 	const today = new Date();
 	let year = $state(today.getFullYear());
 	let month = $state(today.getMonth() + 1);
+	let isInitializing = $state(true);
 	let receipts = $state<ReceiptWithItems[]>([]);
 	let loading = $state(true);
 	let showMonthPicker = $state(false);
+	let stickyHeight = $state(0);
+
+	// 初期表示時のクエリパラメータ反映
+	$effect(() => {
+		if (isInitializing) {
+			const qYear = $page.url.searchParams.get('year');
+			const qMonth = $page.url.searchParams.get('month');
+			if (qYear) year = parseInt(qYear);
+			if (qMonth) month = parseInt(qMonth);
+			isInitializing = false;
+		}
+	});
 
 	// データフェッチ
 	$effect(() => {
@@ -121,8 +135,13 @@
 <PageHeader title="カレンダー" />
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="calendar-page" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
-	<div class="sticky-area">
+<div
+	class="calendar-page"
+	ontouchstart={handleTouchStart}
+	ontouchend={handleTouchEnd}
+	style="--sticky-header-height: {stickyHeight}px"
+>
+	<div class="sticky-area" bind:clientHeight={stickyHeight}>
 		<header class="month-header">
 			<button class="nav-button" onclick={prevMonth} aria-label="前月">
 				<ChevronLeft size={24} />
@@ -190,7 +209,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 1rem;
 		padding: 0.5rem 0;
 	}
 

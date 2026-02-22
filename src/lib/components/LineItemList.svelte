@@ -43,8 +43,6 @@
 			</li>
 		{/each}
 	</ul>
-{:else}
-	<p class="empty-message">明細がありません</p>
 {/if}
 
 <style>
@@ -63,9 +61,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.625rem 0.75rem;
+		padding: 0.75rem;
 		background-color: var(--color-surface-alt);
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
+		transition: background-color 0.15s;
+		min-height: 3rem;
 	}
 
 	/* アイコン */
@@ -123,13 +123,5 @@
 	.item-delete:hover {
 		opacity: 1;
 		color: var(--color-expense);
-	}
-
-	/* 空メッセージ */
-	.empty-message {
-		text-align: center;
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-		padding: 2rem 0;
 	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Props {
 		open: boolean;
@@ -41,12 +42,13 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions // stopPropagation()のみなのでbuttonとして扱わない -->
 		<div
 			class="dialog-content"
 			transition:scale={{ duration: 150, start: 0.95 }}
 			onclick={(e) => e.stopPropagation()}
+			use:focusTrap
+			role="document"
 		>
 			<h2 class="dialog-title">{title}</h2>
 			<p class="dialog-message">{message}</p>

@@ -94,10 +94,10 @@
 
 	function handleLongPress(receipt: ReceiptWithItems) {
 		// 長押し時は編集モードとして入力画面へ
-		// 今回はクエリパラメータで渡す想定
-
+		// 戻り先として年と月をクエリパラメータで渡す
+		const [y, m] = receipt.date.split('-');
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(`/?edit_receipt=${receipt.id}`);
+		goto(`/?edit_receipt=${receipt.id}&return_y=${y}&return_m=${parseInt(m)}`);
 	}
 </script>
 
@@ -213,7 +213,7 @@
 
 	.receipt-card-wrapper {
 		background-color: var(--color-surface);
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 		overflow: hidden;
 	}
@@ -229,15 +229,27 @@
 		cursor: pointer;
 		transition: background-color 0.1s;
 		text-align: left;
+		border-radius: 0.75rem;
+		/* フォーカス時にスティッキーヘッダーと下部ナビに隠れないようにマージンを設定 */
+		scroll-margin-top: calc(3.5rem + var(--sticky-header-height, 0px) + 0.5rem);
+		scroll-margin-bottom: 4.5rem;
 	}
 
 	.receipt-header:active {
 		background-color: var(--color-surface-hover);
 	}
 
+	.receipt-header:focus-visible {
+		outline: 2px solid var(--color-primary-500);
+		outline-offset: -2px;
+		background-color: var(--color-surface-hover);
+		z-index: 1;
+	}
+
 	.receipt-header.expanded {
 		background-color: var(--color-surface-alt);
 		border-bottom: 1px dashed var(--color-border);
+		border-radius: 0.75rem 0.75rem 0 0;
 	}
 
 	.receipt-icon {

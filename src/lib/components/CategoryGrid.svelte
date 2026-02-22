@@ -51,23 +51,23 @@
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.5rem 0.25rem;
-		border: 2px solid transparent;
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
 		background: none;
 		cursor: pointer;
-		transition:
-			border-color 0.15s,
-			background-color 0.15s;
+		transition: all 0.15s;
 		-webkit-tap-highlight-color: transparent;
 	}
 
 	.category-item:active {
-		background-color: var(--color-surface-alt);
+		background-color: var(--color-primary-50);
 	}
 
 	.category-item.selected {
 		border-color: var(--color-primary-400);
-		background-color: var(--color-primary-50);
+		background-color: var(--color-surface-alt);
+		/* ボーダーの代わりに内側のシャドウを使って太く見せる（レイアウトシフト防止） */
+		box-shadow: inset 0 0 0 1px var(--color-primary-400);
 	}
 
 	/* アイコン */

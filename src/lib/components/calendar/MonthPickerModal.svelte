@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	// コンポーネントが受け取るプロパティの定義
 	interface Props {
@@ -57,12 +58,14 @@
 		role="presentation"
 	>
 		<!-- モーダル本体 (クリックイベントの伝播を止めて閉じないようにする) -->
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events  // stopPropagation()のみなのでbuttonとして扱わない -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="modal-content"
 			transition:scale={{ duration: 150, start: 0.95 }}
 			onclick={(e) => e.stopPropagation()}
+			use:focusTrap
+			role="document"
 		>
 			<!-- 年の切り替えヘッダー -->
 			<div class="modal-header">
@@ -126,12 +129,16 @@
 	}
 
 	.year-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		background: none;
 		border: none;
 		font-size: 1.25rem;
 		color: var(--color-text-muted);
 		cursor: pointer;
-		padding: 0.5rem;
+		width: 2.5rem;
+		height: 2.5rem;
 		border-radius: 50%;
 		transition: background-color 0.2s;
 	}

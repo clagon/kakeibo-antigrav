@@ -6,6 +6,7 @@
 	import { formatCurrency } from '$lib/utils/format';
 	import { showToast } from '$lib/stores/toast';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 
 	/** 明細ドラフト型 */
@@ -39,8 +40,20 @@
 
 	// 編集・削除用ステート
 	let editingReceiptId: string | null = $state(null);
+	let returnY: string | null = $state(null);
+	let returnM: string | null = $state(null);
 	let isConfirmOpen: boolean = $state(false);
 	let isDeleting: boolean = $state(false);
+
+	/** 戻る処理 */
+	function handleBack() {
+		if (returnY && returnM) {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
+			goto(`/calendar?year=${returnY}&month=${returnM}`);
+		} else {
+			history.back();
+		}
+	}
 
 	/** 今日の日付文字列を返す */
 	function todayString(): string {
@@ -85,6 +98,11 @@
 
 		// 編集モード：レシートIDがあれば取得する
 		const editId = $page.url.searchParams.get('edit_receipt');
+		const retY = $page.url.searchParams.get('return_y');
+		const retM = $page.url.searchParams.get('return_m');
+		if (retY) returnY = retY;
+		if (retM) returnM = retM;
+
 		if (editId && !editingReceiptId) {
 			loadReceiptForEdit(editId);
 		}
@@ -136,7 +154,7 @@
 			});
 			if (res.ok) {
 				showToast('削除しました');
-				history.back(); // カレンダー等に戻る
+				handleBack(); // カレンダー等に戻る
 			} else {
 				showToast('削除に失敗しました', 'error');
 			}
@@ -176,7 +194,7 @@
 				showToast('保存しました');
 				if (editingReceiptId) {
 					// 編集後は遷移元の画面に戻る
-					history.back();
+					handleBack();
 				} else {
 					// 新規作成時は次の入力をしやすいようフォームリセット
 					date = todayString();
@@ -200,6 +218,8 @@
 
 <PageHeader
 	title={editingReceiptId ? '編集' : activeTab === 'expense' ? '支出入力' : '収入入力'}
+	leftIcon={returnY !== null && returnM !== null ? 'ChevronLeft' : undefined}
+	onLeftClick={returnY !== null && returnM !== null ? handleBack : undefined}
 	rightIcon={editingReceiptId ? 'Trash2' : undefined}
 	onRightClick={editingReceiptId ? () => (isConfirmOpen = true) : undefined}
 />
@@ -244,18 +264,16 @@
 	</div>
 
 	<!-- 合計 -->
-	{#if lineItems.length > 0}
-		<div class="total-section">
-			<span class="total-label">合計</span>
-			<span
-				class="total-amount"
-				class:expense={activeTab === 'expense'}
-				class:income={activeTab === 'income'}
-			>
-				{formatCurrency(total)}
-			</span>
-		</div>
-	{/if}
+	<div class="total-section">
+		<span class="total-label">合計</span>
+		<span
+			class="total-amount"
+			class:expense={activeTab === 'expense'}
+			class:income={activeTab === 'income'}
+		>
+			{formatCurrency(total)}
+		</span>
+	</div>
 
 	<!-- 明細リスト -->
 	<div class="items-section">
@@ -399,7 +417,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.75rem;
+		padding: 1rem;
 		background-color: var(--color-surface-alt);
 		border-radius: 0.5rem;
 	}
@@ -428,6 +446,9 @@
 	.items-section {
 		min-height: 3rem;
 	}
+	.items-section:empty {
+		display: none;
+	}
 
 	/* 明細追加ボタン */
 	.add-item-btn {
@@ -436,21 +457,22 @@
 		justify-content: center;
 		gap: 0.375rem;
 		padding: 0.75rem;
+		margin-bottom: 1rem;
+		min-height: 3rem;
 		border: 2px dashed var(--color-border);
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
 		background: none;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition:
-			border-color 0.15s,
-			color 0.15s;
+		transition: all 0.15s;
 	}
 
 	.add-item-btn:hover {
-		border-color: var(--color-primary-400);
-		color: var(--color-primary-500);
+		border-color: var(--color-primary-300);
+		background-color: var(--color-primary-50);
+		color: var(--color-primary-600);
 	}
 
 	/* 保存ボタン */

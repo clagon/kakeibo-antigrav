@@ -19,8 +19,10 @@
 
 	function handleLongPress(dateStr: string) {
 		// 日付を長押しした場合の動作（入力画面への遷移）
+		// 戻り先として年と月をクエリパラメータで渡す
+		const [y, m] = dateStr.split('-');
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
-		goto(`/?date=${dateStr}`);
+		goto(`/?date=${dateStr}&return_y=${y}&return_m=${parseInt(m)}`);
 	}
 
 	// 月曜始まり固定
@@ -139,15 +141,15 @@
 					if (cell.isCurrentMonth) handleLongPress(cell.dateStr);
 				}}
 				role="button"
-				tabindex="0"
+				tabindex={cell.isCurrentMonth ? 0 : -1}
 			>
 				<div class="day-num" class:font-bold={cell.isToday}>{cell.dayNum}</div>
 				<div class="amounts">
 					<div class="amount-income">
-						{cell.income > 0 ? `+${formatCurrency(cell.income)}` : '\u00A0'}
+						{cell.income > 0 ? `${formatCurrency(cell.income)}` : '\u00A0'}
 					</div>
 					<div class="amount-expense">
-						{cell.expense > 0 ? `-${formatCurrency(cell.expense)}` : '\u00A0'}
+						{cell.expense > 0 ? `${formatCurrency(cell.expense)}` : '\u00A0'}
 					</div>
 				</div>
 			</div>

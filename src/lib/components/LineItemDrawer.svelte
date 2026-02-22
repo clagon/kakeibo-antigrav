@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CategoryGrid from './CategoryGrid.svelte';
 	import NumPad from './NumPad.svelte';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Category {
 		id: string;
@@ -70,7 +71,7 @@
 	<button type="button" class="overlay" onclick={handleClose} aria-label="閉じる"></button>
 
 	<!-- ドロワー本体 -->
-	<div class="drawer" role="dialog" aria-label="明細追加">
+	<div class="drawer" role="dialog" aria-modal="true" aria-label="明細追加" use:focusTrap>
 		<div class="drawer-handle"></div>
 
 		<!-- カテゴリー選択 -->
@@ -83,16 +84,16 @@
 			/>
 		</section>
 
-		<!-- 金額入力 -->
-		<section class="drawer-section">
-			<h3 class="section-title">金額</h3>
-			<NumPad onchange={(v) => (amount = v)} />
-		</section>
-
 		<!-- メモ入力 -->
 		<section class="drawer-section">
 			<h3 class="section-title">メモ</h3>
 			<textarea class="memo-input" bind:value={memo} placeholder="メモ（任意）" rows="2"></textarea>
+		</section>
+
+		<!-- 金額入力 -->
+		<section class="drawer-section">
+			<h3 class="section-title">金額</h3>
+			<NumPad onchange={(v) => (amount = v)} />
 		</section>
 
 		<!-- アクションボタン -->
