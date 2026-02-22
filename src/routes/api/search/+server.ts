@@ -28,7 +28,10 @@ export const GET: RequestHandler = async ({ url }) => {
 			.orderBy(desc(receipts.date));
 
 		// レシート単位にグループ化
-		const receiptMap = new Map<string, any>();
+		type SearchReceipt = typeof receipts.$inferSelect & {
+			items: Array<typeof lineItems.$inferSelect & { category: typeof categories.$inferSelect }>;
+		};
+		const receiptMap = new Map<string, SearchReceipt>();
 
 		for (const row of results) {
 			if (!row.receipt) continue;
@@ -41,9 +44,9 @@ export const GET: RequestHandler = async ({ url }) => {
 			}
 
 			if (row.item && row.category) {
-				const r = receiptMap.get(row.receipt.id);
+				const r = receiptMap.get(row.receipt.id)!;
 				// 重複追加を防ぐ (LEFT JOINにより複数HITした際のCartesian対策)
-				if (!r.items.some((i: any) => i.id === row.item!.id)) {
+				if (!r.items.some((i) => i.id === row.item!.id)) {
 					r.items.push({
 						...row.item,
 						category: row.category

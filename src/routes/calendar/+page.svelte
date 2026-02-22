@@ -133,7 +133,13 @@
 	<title>カレンダー | 家計簿</title>
 </svelte:head>
 
-<PageHeader title="カレンダー" rightIcon="search" onRightClick={() => goto('/search')} />
+<PageHeader
+	title="カレンダー"
+	rightIcon="search"
+	onRightClick={() => {
+		void goto('/search');
+	}}
+/>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div

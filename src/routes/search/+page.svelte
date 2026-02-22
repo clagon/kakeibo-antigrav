@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { fade } from 'svelte/transition';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 	import ReceiptAccordionList, {
 		type ReceiptWithItems
