@@ -16,17 +16,31 @@
 	interface Props {
 		/** 明細リスト */
 		items: LineItemDraft[];
+		/** 明細編集時のコールバック */
+		onedit?: (item: LineItemDraft) => void;
 		/** 明細削除時のコールバック */
 		onremove: (id: string) => void;
 	}
 
-	const { items, onremove }: Props = $props();
+	const { items, onedit, onremove }: Props = $props();
+
+	function handleItemClick(item: LineItemDraft, e: Event) {
+		// 削除ボタンがクリックされた場合は編集イベントを発火しない
+		const target = e.target as HTMLElement;
+		if (target.closest('.item-delete')) return;
+
+		if (onedit) {
+			onedit(item);
+		}
+	}
 </script>
 
 {#if items.length > 0}
 	<ul class="line-item-list">
 		{#each items as item (item.id)}
-			<li class="line-item">
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+			<li class="line-item" class:clickable={!!onedit} onclick={(e) => handleItemClick(item, e)}>
 				<div class="item-icon" style:color={item.categoryColor}>
 					<LucideIcon name={item.categoryIcon} size={20} color={item.categoryColor} />
 				</div>
@@ -66,6 +80,14 @@
 		border-radius: 0.75rem;
 		transition: background-color 0.15s;
 		min-height: 3rem;
+	}
+
+	.line-item.clickable {
+		cursor: pointer;
+	}
+
+	.line-item.clickable:hover {
+		background-color: var(--color-surface-hover, #f1f5f9);
 	}
 
 	/* アイコン */

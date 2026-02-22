@@ -2,14 +2,24 @@
 	import { Delete } from 'lucide-svelte';
 
 	interface Props {
+		/** 現在の金額 */
+		value?: number;
 		/** 値変更時のコールバック */
 		onchange: (value: number) => void;
 	}
 
-	const { onchange }: Props = $props();
+	const { value = 0, onchange }: Props = $props();
 
 	/** 内部の文字列表現 */
 	let display: string = $state('');
+
+	$effect(() => {
+		if (value === 0) {
+			display = '';
+		} else if (value > 0 && Number(display) !== value) {
+			display = String(value);
+		}
+	});
 
 	/** 数字キー押下 */
 	function pressDigit(digit: string) {

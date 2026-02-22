@@ -34,6 +34,7 @@
 	let memo: string = $state('');
 	let lineItems: LineItemDraft[] = $state([]);
 	let isDrawerOpen: boolean = $state(false);
+	let editingItem: LineItemDraft | null = $state(null);
 	let categories: Category[] = $state([]);
 	let isSaving: boolean = $state(false);
 	let nextItemId = 0;
@@ -126,8 +127,8 @@
 		}
 	}
 
-	/** 明細追加 */
-	function addLineItem(data: {
+	/** 明細保存（追加・更新） */
+	function saveLineItem(data: {
 		categoryId: string;
 		categoryName: string;
 		categoryIcon: string;
@@ -135,7 +136,26 @@
 		memo: string;
 		amount: number;
 	}) {
-		lineItems = [...lineItems, { ...data, id: `draft-${nextItemId++}` }];
+		if (editingItem) {
+			const idx = lineItems.findIndex((item) => item.id === editingItem!.id);
+			if (idx !== -1) {
+				lineItems[idx] = { ...data, id: editingItem.id };
+			}
+		} else {
+			lineItems = [...lineItems, { ...data, id: `draft-${nextItemId++}` }];
+		}
+		closeDrawer();
+	}
+
+	/** 明細編集 */
+	function editLineItem(item: LineItemDraft) {
+		editingItem = item;
+		isDrawerOpen = true;
+	}
+
+	/** ドロワーを閉じる */
+	function closeDrawer() {
+		editingItem = null;
 		isDrawerOpen = false;
 	}
 
@@ -277,7 +297,7 @@
 
 	<!-- 明細リスト -->
 	<div class="items-section">
-		<LineItemList items={lineItems} onremove={removeLineItem} />
+		<LineItemList items={lineItems} onedit={editLineItem} onremove={removeLineItem} />
 	</div>
 
 	<!-- 明細追加ボタン -->
@@ -307,8 +327,9 @@
 <LineItemDrawer
 	open={isDrawerOpen}
 	{categories}
-	onadd={addLineItem}
-	onclose={() => (isDrawerOpen = false)}
+	editItem={editingItem}
+	onsave={saveLineItem}
+	onclose={closeDrawer}
 />
 
 <!-- 削除確認ダイアログ -->

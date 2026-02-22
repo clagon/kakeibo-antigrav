@@ -15,8 +15,17 @@
 		open: boolean;
 		/** カテゴリー一覧 */
 		categories: Category[];
-		/** 明細追加時のコールバック */
-		onadd: (data: {
+		/** 編集対象の明細データ（nullの場合は新規追加） */
+		editItem?: {
+			categoryId: string;
+			categoryName: string;
+			categoryIcon: string;
+			categoryColor: string;
+			memo: string;
+			amount: number;
+		} | null;
+		/** 明細保存（追加・更新）時のコールバック */
+		onsave: (data: {
 			categoryId: string;
 			categoryName: string;
 			categoryIcon: string;
@@ -28,12 +37,30 @@
 		onclose: () => void;
 	}
 
-	const { open, categories, onadd, onclose }: Props = $props();
+	const { open, categories, editItem = null, onsave, onclose }: Props = $props();
 
 	/* フォームステート */
 	let selectedCategory: Category | null = $state(null);
 	let amount: number = $state(0);
 	let memo: string = $state('');
+
+	// open に応じたフォーム初期化
+	$effect(() => {
+		if (open) {
+			if (editItem) {
+				selectedCategory = {
+					id: editItem.categoryId,
+					name: editItem.categoryName,
+					icon: editItem.categoryIcon,
+					color: editItem.categoryColor
+				};
+				amount = editItem.amount;
+				memo = editItem.memo;
+			} else {
+				resetForm();
+			}
+		}
+	});
 
 	/** フォームリセット */
 	function resetForm() {
@@ -42,10 +69,10 @@
 		memo = '';
 	}
 
-	/** 追加ボタン押下 */
-	function handleAdd() {
+	/** 保存ボタン押下 */
+	function handleSave() {
 		if (!selectedCategory || amount <= 0) return;
-		onadd({
+		onsave({
 			categoryId: selectedCategory.id,
 			categoryName: selectedCategory.name,
 			categoryIcon: selectedCategory.icon,
@@ -62,8 +89,9 @@
 		onclose();
 	}
 
-	/** 追加可能か判定 */
-	const canAdd = $derived(selectedCategory !== null && amount > 0);
+	/** 追加・更新可能か判定 */
+	const canSave = $derived(selectedCategory !== null && amount > 0);
+	const isEdit = $derived(!!editItem);
 </script>
 
 {#if open}
@@ -93,13 +121,15 @@
 		<!-- 金額入力 -->
 		<section class="drawer-section">
 			<h3 class="section-title">金額</h3>
-			<NumPad onchange={(v) => (amount = v)} />
+			<NumPad value={amount} onchange={(v) => (amount = v)} />
 		</section>
 
 		<!-- アクションボタン -->
 		<div class="drawer-actions">
 			<button type="button" class="btn btn-cancel" onclick={handleClose}>キャンセル</button>
-			<button type="button" class="btn btn-add" disabled={!canAdd} onclick={handleAdd}>追加</button>
+			<button type="button" class="btn btn-save" disabled={!canSave} onclick={handleSave}>
+				{isEdit ? '更新' : '追加'}
+			</button>
 		</div>
 	</div>
 {/if}
@@ -197,17 +227,17 @@
 		color: var(--color-text-muted);
 	}
 
-	.btn-add {
+	.btn-save {
 		background-color: var(--color-primary-500);
 		color: white;
 	}
 
-	.btn-add:disabled {
+	.btn-save:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
 	}
 
-	.btn-add:not(:disabled):active {
+	.btn-save:not(:disabled):active {
 		background-color: var(--color-primary-600);
 	}
 
