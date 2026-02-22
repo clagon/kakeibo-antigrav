@@ -6,6 +6,7 @@
 		type ReceiptWithItems
 	} from '$lib/components/calendar/ReceiptAccordionList.svelte';
 	import MonthPickerModal from '$lib/components/calendar/MonthPickerModal.svelte';
+	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 
 	// 状態管理
 	const today = new Date();
@@ -117,6 +118,8 @@
 	<title>カレンダー | 家計簿</title>
 </svelte:head>
 
+<PageHeader title="カレンダー" />
+
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="calendar-page" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
 	<div class="sticky-area">
@@ -166,17 +169,16 @@
 <style>
 	.calendar-page {
 		padding: 0;
-		min-height: 100vh; /* 縦スクロール用に確保 */
 		display: flex;
 		flex-direction: column;
 	}
 
 	.sticky-area {
 		position: sticky;
-		top: 0;
+		top: 3.5rem;
 		z-index: 10;
 		background-color: var(--color-background);
-		padding: 1rem 1rem 0;
+		padding: 0.25rem 1rem 0;
 	}
 
 	.list-area {

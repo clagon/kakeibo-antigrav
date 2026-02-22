@@ -2,6 +2,7 @@
 	import { ChevronLeft, ChevronRight, Plus } from 'lucide-svelte';
 	import LineItemDrawer from '$lib/components/LineItemDrawer.svelte';
 	import LineItemList from '$lib/components/LineItemList.svelte';
+	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { showToast } from '$lib/stores/toast';
 	import { page } from '$app/stores';
@@ -197,36 +198,34 @@
 	<title>{activeTab === 'expense' ? '支出' : '収入'}入力 | 家計簿</title>
 </svelte:head>
 
+<PageHeader
+	title={editingReceiptId ? '編集' : activeTab === 'expense' ? '支出入力' : '収入入力'}
+	rightIcon={editingReceiptId ? 'Trash2' : undefined}
+	onRightClick={editingReceiptId ? () => (isConfirmOpen = true) : undefined}
+/>
+
 <div class="input-page">
-	<!-- 編集モード時のヘッダー表示 -->
-	{#if editingReceiptId}
-		<div class="edit-header">
-			<span class="edit-badge">レシートを編集中</span>
-			<button class="delete-btn" type="button" onclick={() => (isConfirmOpen = true)}>
-				削除
+	<!-- タブ切り替え -->
+	{#if !editingReceiptId}
+		<div class="tabs">
+			<button
+				type="button"
+				class="tab"
+				class:active={activeTab === 'expense'}
+				onclick={() => switchTab('expense')}
+			>
+				支出
+			</button>
+			<button
+				type="button"
+				class="tab"
+				class:active={activeTab === 'income'}
+				onclick={() => switchTab('income')}
+			>
+				収入
 			</button>
 		</div>
 	{/if}
-
-	<!-- タブ切り替え -->
-	<div class="tabs">
-		<button
-			type="button"
-			class="tab"
-			class:active={activeTab === 'expense'}
-			onclick={() => switchTab('expense')}
-		>
-			支出
-		</button>
-		<button
-			type="button"
-			class="tab"
-			class:active={activeTab === 'income'}
-			onclick={() => switchTab('income')}
-		>
-			収入
-		</button>
-	</div>
 
 	<!-- 日付入力 -->
 	<div class="date-picker">
@@ -311,39 +310,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-	}
-
-	/* 編集ヘッダー領域 */
-	.edit-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem 0.75rem;
-		background-color: var(--color-surface-alt);
-		border-radius: 0.5rem;
-		border-left: 4px solid var(--color-primary-500);
-	}
-
-	.edit-badge {
-		font-size: 0.875rem;
-		font-weight: 700;
-		color: var(--color-text);
-	}
-
-	.delete-btn {
-		background: transparent;
-		color: var(--color-expense);
-		border: 1px solid var(--color-border);
-		border-radius: 0.375rem;
-		padding: 0.25rem 0.75rem;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background-color 0.15s;
-	}
-
-	.delete-btn:hover {
-		background-color: var(--color-surface-hover);
 	}
 
 	/* タブ */
