@@ -103,6 +103,22 @@
 		</button>
 	</section>
 
+	<!-- データ管理 -->
+	<section class="section">
+		<h2 class="section-title">データ管理</h2>
+
+		<button
+			class="nav-row"
+			onclick={() => {
+				// eslint-disable-next-line svelte/no-navigation-without-resolve
+				goto('/settings/backup');
+			}}
+		>
+			<span>CSVバックアップ・復元</span>
+			<ChevronRight size={18} />
+		</button>
+	</section>
+
 	<!-- ③ ヘルプ / バージョン -->
 	<section class="section">
 		<h2 class="section-title">ヘルプ・情報</h2>

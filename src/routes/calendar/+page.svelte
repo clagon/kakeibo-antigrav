@@ -196,7 +196,7 @@
 		position: sticky;
 		top: 3.5rem;
 		z-index: 10;
-		background-color: var(--color-background);
+		background-color: var(--color-surface);
 		padding: 0.25rem 1rem 0;
 	}
 

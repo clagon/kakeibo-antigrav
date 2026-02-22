@@ -2,6 +2,8 @@
 	import LucideIcon from './LucideIcon.svelte';
 	import { Trash2 } from 'lucide-svelte';
 	import { formatCurrency } from '$lib/utils/format';
+	import { slide } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 
 	interface LineItemDraft {
 		id: string;
@@ -40,7 +42,13 @@
 		{#each items as item (item.id)}
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-			<li class="line-item" class:clickable={!!onedit} onclick={(e) => handleItemClick(item, e)}>
+			<li
+				class="line-item"
+				class:clickable={!!onedit}
+				onclick={(e) => handleItemClick(item, e)}
+				transition:slide={{ duration: 250 }}
+				animate:flip={{ duration: 250 }}
+			>
 				<div class="item-icon" style:color={item.categoryColor}>
 					<LucideIcon name={item.categoryIcon} size={20} color={item.categoryColor} />
 				</div>

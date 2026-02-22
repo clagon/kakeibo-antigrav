@@ -1,10 +1,24 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import BottomNav from '$lib/components/BottomNav.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		if (browser && 'serviceWorker' in navigator) {
+			navigator.serviceWorker
+				.register('/service-worker.js', {
+					type: 'module'
+				})
+				.catch((err) => {
+					console.error('ServiceWorker registration failed: ', err);
+				});
+		}
+	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
