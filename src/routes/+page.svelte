@@ -5,6 +5,7 @@
 	import { formatCurrency } from '$lib/utils/format';
 	import { showToast } from '$lib/stores/toast';
 	import { page } from '$app/stores';
+	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
 
 	/** 明細ドラフト型 */
 	interface LineItemDraft {
@@ -34,6 +35,11 @@
 	let categories: Category[] = $state([]);
 	let isSaving: boolean = $state(false);
 	let nextItemId = 0;
+
+	// 編集・削除用ステート
+	let editingReceiptId: string | null = $state(null);
+	let isConfirmOpen: boolean = $state(false);
+	let isDeleting: boolean = $state(false);
 
 	/** 今日の日付文字列を返す */
 	function todayString(): string {
@@ -75,7 +81,31 @@
 		if (queryDate && !isNaN(Date.parse(queryDate))) {
 			date = queryDate;
 		}
+
+		// 編集モード：レシートIDがあれば取得する
+		const editId = $page.url.searchParams.get('edit_receipt');
+		if (editId && !editingReceiptId) {
+			loadReceiptForEdit(editId);
+		}
 	});
+
+	async function loadReceiptForEdit(id: string) {
+		try {
+			const res = await fetch(`/api/receipts/${id}`);
+			if (res.ok) {
+				const data = await res.json();
+				editingReceiptId = data.id;
+				date = data.date;
+				activeTab = data.type;
+				memo = data.memo;
+				lineItems = data.items;
+			} else {
+				showToast('レシートの読み込みに失敗しました', 'error');
+			}
+		} catch {
+			showToast('レシート読み込み中にエラーが発生しました', 'error');
+		}
+	}
 
 	/** 明細追加 */
 	function addLineItem(data: {
@@ -95,14 +125,39 @@
 		lineItems = lineItems.filter((item) => item.id !== id);
 	}
 
+	/** レシート削除 */
+	async function deleteReceipt() {
+		if (!editingReceiptId) return;
+		isDeleting = true;
+		try {
+			const res = await fetch(`/api/receipts/${editingReceiptId}`, {
+				method: 'DELETE'
+			});
+			if (res.ok) {
+				showToast('削除しました');
+				history.back(); // カレンダー等に戻る
+			} else {
+				showToast('削除に失敗しました', 'error');
+			}
+		} catch {
+			showToast('削除に失敗しました', 'error');
+		} finally {
+			isDeleting = false;
+			isConfirmOpen = false;
+		}
+	}
+
 	/** 保存 */
 	async function save() {
 		if (lineItems.length === 0) return;
 		isSaving = true;
 
 		try {
-			const res = await fetch('/api/receipts', {
-				method: 'POST',
+			const method = editingReceiptId ? 'PUT' : 'POST';
+			const url = editingReceiptId ? `/api/receipts/${editingReceiptId}` : '/api/receipts';
+
+			const res = await fetch(url, {
+				method,
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					date,
@@ -117,11 +172,16 @@
 			});
 
 			if (res.ok) {
-				// リセット
-				date = todayString();
-				memo = '';
-				lineItems = [];
 				showToast('保存しました');
+				if (editingReceiptId) {
+					// 編集後は遷移元の画面に戻る
+					history.back();
+				} else {
+					// 新規作成時は次の入力をしやすいようフォームリセット
+					date = todayString();
+					memo = '';
+					lineItems = [];
+				}
 			} else {
 				showToast('保存に失敗しました', 'error');
 			}
@@ -138,6 +198,16 @@
 </svelte:head>
 
 <div class="input-page">
+	<!-- 編集モード時のヘッダー表示 -->
+	{#if editingReceiptId}
+		<div class="edit-header">
+			<span class="edit-badge">レシートを編集中</span>
+			<button class="delete-btn" type="button" onclick={() => (isConfirmOpen = true)}>
+				削除
+			</button>
+		</div>
+	{/if}
+
 	<!-- タブ切り替え -->
 	<div class="tabs">
 		<button
@@ -206,7 +276,13 @@
 		disabled={lineItems.length === 0 || isSaving}
 		onclick={save}
 	>
-		{isSaving ? '保存中...' : '保存'}
+		{#if isSaving}
+			保存中...
+		{:else if editingReceiptId}
+			上書きする
+		{:else}
+			保存する
+		{/if}
 	</button>
 </div>
 
@@ -218,12 +294,56 @@
 	onclose={() => (isDrawerOpen = false)}
 />
 
+<!-- 削除確認ダイアログ -->
+<ConfirmDialog
+	open={isConfirmOpen}
+	title="レシートの削除"
+	message="このレシートと明細を完全に削除します。よろしいですか？"
+	confirmText={isDeleting ? '削除中...' : '削除する'}
+	variant="danger"
+	onConfirm={deleteReceipt}
+	onCancel={() => (isConfirmOpen = false)}
+/>
+
 <style>
 	.input-page {
 		padding: 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+	}
+
+	/* 編集ヘッダー領域 */
+	.edit-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0.75rem;
+		background-color: var(--color-surface-alt);
+		border-radius: 0.5rem;
+		border-left: 4px solid var(--color-primary-500);
+	}
+
+	.edit-badge {
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-text);
+	}
+
+	.delete-btn {
+		background: transparent;
+		color: var(--color-expense);
+		border: 1px solid var(--color-border);
+		border-radius: 0.375rem;
+		padding: 0.25rem 0.75rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background-color 0.15s;
+	}
+
+	.delete-btn:hover {
+		background-color: var(--color-surface-hover);
 	}
 
 	/* タブ */
