@@ -24,7 +24,7 @@
 	<div class="right-section">
 		{#if rightIcon && onRightClick}
 			<button class="header-action" onclick={onRightClick} aria-label="Action">
-				<LucideIcon name={rightIcon} size={20} color="var(--color-expense)" />
+				<LucideIcon name={rightIcon} size={20} color="var(--color-text)" />
 			</button>
 		{/if}
 	</div>

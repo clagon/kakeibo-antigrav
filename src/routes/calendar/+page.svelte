@@ -8,6 +8,7 @@
 	import MonthPickerModal from '$lib/components/calendar/MonthPickerModal.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	// 状態管理
 	const today = new Date();
@@ -132,7 +133,7 @@
 	<title>カレンダー | 家計簿</title>
 </svelte:head>
 
-<PageHeader title="カレンダー" />
+<PageHeader title="カレンダー" rightIcon="search" onRightClick={() => goto('/search')} />
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
