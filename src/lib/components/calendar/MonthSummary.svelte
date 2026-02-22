@@ -14,68 +14,74 @@
 	const balance = $derived(income - expense);
 </script>
 
-<div class="summary-container">
-	<div class="summary-item">
-		<span class="label text-income">収入</span>
-		<span class="value text-income">{formatCurrency(income)}</span>
+<div class="summary-card">
+	<div class="summary-item income">
+		<span class="summary-label">収入</span>
+		<span class="summary-amount income">{formatCurrency(income)}</span>
 	</div>
 	<div class="summary-divider"></div>
 	<div class="summary-item">
-		<span class="label text-expense">支出</span>
-		<span class="value text-expense">{formatCurrency(expense)}</span>
+		<span class="summary-label">支出</span>
+		<span class="summary-amount expense">{formatCurrency(expense)}</span>
 	</div>
 	<div class="summary-divider"></div>
 	<div class="summary-item">
-		<span class="label">収支</span>
-		<span class="value" class:text-income={balance > 0} class:text-expense={balance < 0}>
+		<span class="summary-label">収支</span>
+		<span class="summary-amount balance" class:positive={balance >= 0} class:negative={balance < 0}>
 			{balance > 0 ? '+' : ''}{formatCurrency(balance)}
 		</span>
 	</div>
 </div>
 
 <style>
-	.summary-container {
+	.summary-card {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		background-color: var(--color-surface);
-		padding: 1rem;
-		border-radius: 0.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		margin-bottom: 1rem;
+		align-items: stretch;
+		background: var(--color-surface-alt);
+		border-radius: 0.75rem;
+		overflow: hidden;
 	}
 
 	.summary-item {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		flex: 1;
+		padding: 0.75rem 0.5rem;
+		gap: 0.2rem;
+	}
+
+	.summary-label {
+		font-size: 0.7rem;
+		color: var(--color-text-muted);
+	}
+
+	.summary-amount {
+		font-size: 0.9rem;
+		font-weight: 700;
+		font-family: 'Roboto', sans-serif;
+		color: var(--color-text);
+	}
+
+	.summary-amount.income {
+		color: var(--color-income);
+	}
+
+	.summary-amount.expense {
+		color: var(--color-expense);
+	}
+
+	.summary-amount.balance.positive {
+		color: var(--color-balance);
+	}
+
+	.summary-amount.balance.negative {
+		color: var(--color-expense);
 	}
 
 	.summary-divider {
 		width: 1px;
-		height: 2.5rem;
-		background-color: var(--color-border);
-	}
-
-	.label {
-		font-size: 0.75rem;
-		font-weight: 500;
-		color: var(--color-text-muted);
-		margin-bottom: 0.25rem;
-	}
-
-	.value {
-		font-size: 1rem;
-		font-weight: 700;
-		font-family: 'Roboto', sans-serif;
-	}
-
-	.text-income {
-		color: var(--color-income);
-	}
-
-	.text-expense {
-		color: var(--color-expense);
+		background: var(--color-border);
+		margin: 0.5rem 0;
 	}
 </style>
