@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+	/* フォント */
+	--font-sans: 'Noto Sans JP', 'Roboto', sans-serif;
+	--font-emoji: 'Noto Color Emoji', sans-serif;
+
+	/* プライマリカラー */
+	--color-primary-50: #eff6ff;
+	--color-primary-100: #dbeafe;
+	--color-primary-200: #bfdbfe;
+	--color-primary-300: #93c5fd;
+	--color-primary-400: #60a5fa;
+	--color-primary-500: #3b82f6;
+	--color-primary-600: #2563eb;
+	--color-primary-700: #1d4ed8;
+	--color-primary-800: #1e40af;
+	--color-primary-900: #1e3a8a;
+
+	/* セマンティックカラー */
+	--color-expense: #ef4444;
+	--color-income: #3b82f6;
+	--color-balance: #10b981;
+
+	/* サーフェス・テキスト */
+	--color-surface: #ffffff;
+	--color-surface-alt: #f8fafc;
+	--color-border: #e2e8f0;
+	--color-text: #1e293b;
+	--color-text-muted: #64748b;
+
+	/* レイアウト */
+	--spacing-nav-height: 4rem;
+}
+
+/* ベーススタイル */
+body {
+	font-family: var(--font-sans);
+	color: var(--color-text);
+	background-color: var(--color-surface);
+}
