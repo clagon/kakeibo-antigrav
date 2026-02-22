@@ -16,9 +16,13 @@
 
 	// ---- フォーム状態 ----
 	const isEdit = $derived(!!category?.id);
+	// svelte-ignore state_referenced_locally
 	let name = $state(category?.name ?? '');
+	// svelte-ignore state_referenced_locally
 	let selectedIcon = $state(category?.icon ?? 'package');
+	// svelte-ignore state_referenced_locally
 	let selectedColor = $state(category?.color ?? '#64748b');
+	// svelte-ignore state_referenced_locally
 	let selectedType = $state<'expense' | 'income'>(category?.type ?? defaultType);
 
 	// ---- アイコン候補 ----
