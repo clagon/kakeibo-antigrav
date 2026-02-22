@@ -33,4 +33,5 @@ export interface ReceiptData {
 export interface AppSettingsData {
 	initialBalance: number;
 	weekStartDay: number;
+	version: string;
 }
