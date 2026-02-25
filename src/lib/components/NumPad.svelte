@@ -123,7 +123,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		height: 3rem;
+		height: 2.75rem;
 		font-size: 1.25rem;
 		font-weight: 500;
 		border: none;

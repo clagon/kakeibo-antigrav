@@ -4,6 +4,8 @@
 	import { type AppSettingsData } from '$lib/types';
 	import { goto } from '$app/navigation';
 	import { ChevronRight } from 'lucide-svelte';
+	import { userPreferences } from '$lib/stores/preferences';
+	import ToggleRow from '$lib/components/settings/ToggleRow.svelte';
 
 	// ---- 型定義 ----
 	interface AppSettings extends AppSettingsData {
@@ -77,6 +79,23 @@
 					<option value={1}>月曜始まり</option>
 					<option value={0}>日曜始まり</option>
 				</select>
+			</div>
+
+			<div class="setting-row-group">
+				<ToggleRow
+					id="reduce-animations"
+					title="アニメーションを減らす"
+					description="数字のカウントアップやリストの動きを抑えます。"
+					checked={!$userPreferences.enableAnimations}
+					onchange={(checked) => ($userPreferences.enableAnimations = !checked)}
+				/>
+				<ToggleRow
+					id="autofocus-memo"
+					title="入力時にメモ欄をフォーカス"
+					description="入力画面が開いた時、すぐにテキストが打てるようになります。"
+					checked={$userPreferences.autoFocusMemo}
+					onchange={(checked) => ($userPreferences.autoFocusMemo = checked)}
+				/>
 			</div>
 
 			{#if isSavingSettings}
@@ -185,13 +204,24 @@
 		gap: 1rem;
 	}
 
-	.setting-row:last-of-type {
+	.setting-row-group {
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.setting-row-group :global(.setting-row) {
+		border-bottom: none;
+	}
+
+	.setting-row:last-of-type,
+	.setting-row-group:last-of-type {
 		border-bottom: none;
 	}
 
 	.setting-label {
 		font-size: 0.875rem;
 		color: var(--color-text);
+		display: flex;
+		flex-direction: column;
 	}
 
 	/* .setting-input {
