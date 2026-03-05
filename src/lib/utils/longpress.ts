@@ -6,9 +6,21 @@
 export function longpress(node: HTMLElement, duration: number = 500) {
 	let timer: ReturnType<typeof setTimeout>;
 	let isKeydownActive = false;
+	let startX = 0;
+	let startY = 0;
 
 	// タッチ、クリック、またはキーボードが開始された時の処理
-	const handleStart = () => {
+	const handleStart = (e?: Event) => {
+		if (e) {
+			if (e.type === 'mousedown') {
+				startX = (e as MouseEvent).clientX;
+				startY = (e as MouseEvent).clientY;
+			} else if (e.type === 'touchstart') {
+				startX = (e as TouchEvent).touches[0].clientX;
+				startY = (e as TouchEvent).touches[0].clientY;
+			}
+		}
+
 		// 指定時間（duration）経過後に 'longpress' カスタムイベントを発火させる
 		timer = setTimeout(() => {
 			node.dispatchEvent(new CustomEvent('longpress'));
@@ -20,6 +32,26 @@ export function longpress(node: HTMLElement, duration: number = 500) {
 		// 長押し判定に達する前に解除された場合はタイマーをキャンセルする
 		clearTimeout(timer);
 		isKeydownActive = false;
+	};
+
+	// ユーザーが指やマウスを動かした時の処理
+	const handleMove = (e: Event) => {
+		let currentX = 0;
+		let currentY = 0;
+		if (e.type === 'mousemove') {
+			currentX = (e as MouseEvent).clientX;
+			currentY = (e as MouseEvent).clientY;
+		} else if (e.type === 'touchmove') {
+			currentX = (e as TouchEvent).touches[0].clientX;
+			currentY = (e as TouchEvent).touches[0].clientY;
+		} else {
+			return;
+		}
+
+		// 10px以上動いたらスクロールとみなして長押しをキャンセル
+		if (Math.abs(currentX - startX) > 10 || Math.abs(currentY - startY) > 10) {
+			handleEnd();
+		}
 	};
 
 	// キーボード押下時の処理
@@ -37,12 +69,14 @@ export function longpress(node: HTMLElement, duration: number = 500) {
 	// マウスイベントの登録
 	node.addEventListener('mousedown', handleStart);
 	node.addEventListener('mouseup', handleEnd);
+	node.addEventListener('mousemove', handleMove);
 	// 要素外にポインターが外れた場合も長押しをキャンセル
 	node.addEventListener('mouseleave', handleEnd);
 
 	// タッチイベントの登録 (passive: true を指定してスクロール性能の低下を防ぐ)
 	node.addEventListener('touchstart', handleStart, { passive: true });
 	node.addEventListener('touchend', handleEnd);
+	node.addEventListener('touchmove', handleMove, { passive: true });
 	// タッチ操作がシステムによってキャンセルされた場合
 	node.addEventListener('touchcancel', handleEnd);
 
@@ -59,9 +93,11 @@ export function longpress(node: HTMLElement, duration: number = 500) {
 		destroy() {
 			node.removeEventListener('mousedown', handleStart);
 			node.removeEventListener('mouseup', handleEnd);
+			node.removeEventListener('mousemove', handleMove);
 			node.removeEventListener('mouseleave', handleEnd);
 			node.removeEventListener('touchstart', handleStart);
 			node.removeEventListener('touchend', handleEnd);
+			node.removeEventListener('touchmove', handleMove);
 			node.removeEventListener('touchcancel', handleEnd);
 			node.removeEventListener('keydown', handleKeydown);
 			node.removeEventListener('keyup', handleEnd);

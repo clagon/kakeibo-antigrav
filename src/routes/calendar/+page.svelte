@@ -110,22 +110,31 @@
 
 	// タッチスワイプ検知
 	let touchStartX = 0;
+	let touchStartY = 0;
 	let touchEndX = 0;
+	let touchEndY = 0;
 
 	function handleTouchStart(e: TouchEvent) {
 		touchStartX = e.changedTouches[0].screenX;
+		touchStartY = e.changedTouches[0].screenY;
 	}
 
 	function handleTouchEnd(e: TouchEvent) {
 		touchEndX = e.changedTouches[0].screenX;
+		touchEndY = e.changedTouches[0].screenY;
 		handleSwipe();
 	}
 
 	function handleSwipe() {
-		const diff = touchEndX - touchStartX;
-		// 50px以上のスワイプで月を切り替え
-		if (diff > 50) prevMonth();
-		else if (diff < -50) nextMonth();
+		const diffX = touchEndX - touchStartX;
+		const diffY = touchEndY - touchStartY;
+
+		// 縦スクロールの方が大きい場合は横スワイプと判定せずキャンセル
+		if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+		// 60px以上のスワイプで月を切り替え (感度を若干下げて誤爆防止)
+		if (diffX > 60) prevMonth();
+		else if (diffX < -60) nextMonth();
 	}
 </script>
 
