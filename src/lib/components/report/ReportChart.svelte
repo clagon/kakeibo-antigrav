@@ -12,6 +12,8 @@
 		Legend
 	} from 'chart.js';
 
+	import { userPreferences } from '$lib/stores/preferences';
+
 	Chart.register(
 		DoughnutController,
 		BarController,
@@ -40,6 +42,9 @@
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
+
+	// アニメーション設定
+	const enableAnimations = $derived($userPreferences.enableAnimations);
 
 	// チャートのデータセットを構成
 	function buildChartData() {
@@ -76,6 +81,7 @@
 		const base = {
 			responsive: true,
 			maintainAspectRatio: true,
+			animation: enableAnimations ? true : false,
 			plugins: {
 				legend: { display: false },
 				tooltip: {
@@ -119,12 +125,15 @@
 		chart = null;
 	});
 
-	// データが変わったらチャートを更新
+	// データまたは設定が変わったらチャートを更新
 	$effect(() => {
 		if (!chart) return;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(chart.data as any) = buildChartData();
-		chart.update();
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(chart.options as any) = buildChartOptions();
+		// Disable animation for the update itself if user has disabled animations
+		chart.update(enableAnimations ? undefined : 'none');
 	});
 </script>
 

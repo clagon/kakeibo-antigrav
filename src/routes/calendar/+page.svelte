@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-svelte';
+	import { ChevronLeft, ChevronRight, ChevronDown, CalendarPlus } from 'lucide-svelte';
 	import MonthSummary from '$lib/components/calendar/MonthSummary.svelte';
 	import CalendarGrid from '$lib/components/calendar/CalendarGrid.svelte';
 	import ReceiptAccordionList, {
@@ -174,7 +174,23 @@
 		{#if loading}
 			<div class="loading-state">読み込み中...</div>
 		{:else if receipts.length === 0}
-			<div class="empty-state">この月のデータはありません</div>
+			<div class="empty-state">
+				<div class="empty-icon-wrap">
+					<CalendarPlus size={48} strokeWidth={1.5} />
+				</div>
+				<p class="empty-title">この月のデータはありません</p>
+				<p class="empty-desc">新しい支出や収入を記録しましょう。</p>
+				<button
+					type="button"
+					class="empty-cta"
+					onclick={() => {
+						// eslint-disable-next-line svelte/no-navigation-without-resolve
+						goto(`/?date=${year}-${String(month).padStart(2, '0')}-01`);
+					}}
+				>
+					入力を始める
+				</button>
+			</div>
 		{:else}
 			<ReceiptAccordionList {receipts} />
 		{/if}
@@ -274,11 +290,57 @@
 		pointer-events: none;
 	}
 
-	.loading-state,
-	.empty-state {
+	.loading-state {
 		text-align: center;
 		padding: 2rem;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
+	}
+
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 3rem 1rem;
+		text-align: center;
+		background: var(--color-surface-alt);
+		border-radius: 1rem;
+		margin-top: 1rem;
+	}
+
+	.empty-icon-wrap {
+		color: var(--color-text-muted);
+		opacity: 0.5;
+		margin-bottom: 1rem;
+	}
+
+	.empty-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text);
+		margin: 0 0 0.5rem 0;
+	}
+
+	.empty-desc {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0 0 1.5rem 0;
+	}
+
+	.empty-cta {
+		background-color: var(--color-primary-500);
+		color: white;
+		border: none;
+		padding: 0.75rem 1.5rem;
+		border-radius: 2rem;
+		font-weight: 600;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.empty-cta:hover {
+		background-color: var(--color-primary-600);
 	}
 </style>

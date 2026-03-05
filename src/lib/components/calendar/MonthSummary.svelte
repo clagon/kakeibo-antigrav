@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatCurrency } from '$lib/utils/format';
+	import AnimatedNumber from '$lib/components/AnimatedNumber.svelte';
 
 	interface Props {
 		/** 収入合計 */
@@ -17,18 +17,18 @@
 <div class="summary-card">
 	<div class="summary-item income">
 		<span class="summary-label">収入</span>
-		<span class="summary-amount income">{formatCurrency(income)}</span>
+		<span class="summary-amount income"><AnimatedNumber value={income} /></span>
 	</div>
 	<div class="summary-divider"></div>
 	<div class="summary-item">
 		<span class="summary-label">支出</span>
-		<span class="summary-amount expense">{formatCurrency(expense)}</span>
+		<span class="summary-amount expense"><AnimatedNumber value={expense} /></span>
 	</div>
 	<div class="summary-divider"></div>
 	<div class="summary-item">
 		<span class="summary-label">収支</span>
 		<span class="summary-amount balance" class:positive={balance >= 0} class:negative={balance < 0}>
-			{balance > 0 ? '+' : ''}{formatCurrency(balance)}
+			{balance > 0 ? '+' : ''}<AnimatedNumber value={Math.abs(balance)} />
 		</span>
 	</div>
 </div>

@@ -2,12 +2,15 @@
 	import { ChevronLeft, ChevronRight, Plus } from 'lucide-svelte';
 	import LineItemDrawer from '$lib/components/LineItemDrawer.svelte';
 	import LineItemList from '$lib/components/LineItemList.svelte';
+	import QuickCategories from '$lib/components/QuickCategories.svelte';
+	import AnimatedNumber from '$lib/components/AnimatedNumber.svelte';
 	import PageHeader from '$lib/components/layout/PageHeader.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import { showToast } from '$lib/stores/toast';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import { userPreferences } from '$lib/stores/preferences';
 
 	/** 明細ドラフト型 */
 	interface LineItemDraft {
@@ -35,9 +38,11 @@
 	let lineItems: LineItemDraft[] = $state([]);
 	let isDrawerOpen: boolean = $state(false);
 	let editingItem: LineItemDraft | null = $state(null);
+	let quickCategory: Category | null = $state(null);
 	let categories: Category[] = $state([]);
 	let isSaving: boolean = $state(false);
 	let nextItemId = 0;
+	let receiptMemoInput: HTMLTextAreaElement | undefined = $state();
 
 	// 編集・削除用ステート
 	let editingReceiptId: string | null = $state(null);
@@ -107,6 +112,11 @@
 		if (editId && !editingReceiptId) {
 			loadReceiptForEdit(editId);
 		}
+
+		// マウント時に設定が有効ならレシート側のメモ欄にフォーカス
+		if ($userPreferences.autoFocusMemo) {
+			setTimeout(() => receiptMemoInput?.focus(), 50);
+		}
 	});
 
 	async function loadReceiptForEdit(id: string) {
@@ -128,14 +138,17 @@
 	}
 
 	/** 明細保存（追加・更新） */
-	function saveLineItem(data: {
-		categoryId: string;
-		categoryName: string;
-		categoryIcon: string;
-		categoryColor: string;
-		memo: string;
-		amount: number;
-	}) {
+	function saveLineItem(
+		data: {
+			categoryId: string;
+			categoryName: string;
+			categoryIcon: string;
+			categoryColor: string;
+			memo: string;
+			amount: number;
+		},
+		continuous: boolean = false
+	) {
 		if (editingItem) {
 			const idx = lineItems.findIndex((item) => item.id === editingItem!.id);
 			if (idx !== -1) {
@@ -144,7 +157,12 @@
 		} else {
 			lineItems = [...lineItems, { ...data, id: `draft-${nextItemId++}` }];
 		}
-		closeDrawer();
+
+		if (!continuous) {
+			closeDrawer();
+		} else {
+			showToast(`${data.categoryName}に${formatCurrency(data.amount)}を追加しました`, 'success');
+		}
 	}
 
 	/** 明細編集 */
@@ -153,9 +171,16 @@
 		isDrawerOpen = true;
 	}
 
+	/** ドロワーを開く (通常/QuickAdd) */
+	function openDrawer(cat?: Category) {
+		quickCategory = cat || null;
+		isDrawerOpen = true;
+	}
+
 	/** ドロワーを閉じる */
 	function closeDrawer() {
 		editingItem = null;
+		quickCategory = null;
 		isDrawerOpen = false;
 	}
 
@@ -280,8 +305,19 @@
 
 	<!-- メモ入力 -->
 	<div class="memo-section">
-		<textarea class="memo-input" bind:value={memo} placeholder="メモ（任意）" rows="2"></textarea>
+		<textarea
+			bind:this={receiptMemoInput}
+			class="memo-input"
+			bind:value={memo}
+			placeholder="メモ（任意）"
+			rows="2"
+		></textarea>
 	</div>
+
+	<!-- クイック追加 -->
+	{#if categories.length > 0}
+		<QuickCategories {categories} onSelect={openDrawer} />
+	{/if}
 
 	<!-- 合計 -->
 	<div class="total-section">
@@ -291,7 +327,7 @@
 			class:expense={activeTab === 'expense'}
 			class:income={activeTab === 'income'}
 		>
-			{formatCurrency(total)}
+			<AnimatedNumber value={total} />
 		</span>
 	</div>
 
@@ -301,7 +337,7 @@
 	</div>
 
 	<!-- 明細追加ボタン -->
-	<button type="button" class="add-item-btn" onclick={() => (isDrawerOpen = true)}>
+	<button type="button" class="add-item-btn" onclick={() => openDrawer()}>
 		<Plus size={20} />
 		明細を追加
 	</button>
@@ -328,6 +364,7 @@
 	open={isDrawerOpen}
 	{categories}
 	editItem={editingItem}
+	initialCategory={quickCategory}
 	onsave={saveLineItem}
 	onclose={closeDrawer}
 />

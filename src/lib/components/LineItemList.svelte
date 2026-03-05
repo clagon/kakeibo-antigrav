@@ -4,6 +4,7 @@
 	import { formatCurrency } from '$lib/utils/format';
 	import { slide } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+	import { userPreferences } from '$lib/stores/preferences';
 
 	interface LineItemDraft {
 		id: string;
@@ -40,28 +41,36 @@
 {#if items.length > 0}
 	<ul class="line-item-list">
 		{#each items as item (item.id)}
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 			<li
-				class="line-item"
-				class:clickable={!!onedit}
-				onclick={(e) => handleItemClick(item, e)}
-				transition:slide={{ duration: 250 }}
-				animate:flip={{ duration: 250 }}
+				class="line-item-container"
+				transition:slide={{ duration: $userPreferences.enableAnimations ? 250 : 0 }}
+				animate:flip={{ duration: $userPreferences.enableAnimations ? 250 : 0 }}
 			>
-				<div class="item-icon" style:color={item.categoryColor}>
-					<LucideIcon name={item.categoryIcon} size={20} color={item.categoryColor} />
+				<div class="scroll-container">
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class="line-item"
+						class:clickable={!!onedit}
+						onclick={(e) => handleItemClick(item, e)}
+					>
+						<div class="item-icon" style:color={item.categoryColor}>
+							<LucideIcon name={item.categoryIcon} size={20} color={item.categoryColor} />
+						</div>
+						<div class="item-info">
+							<span class="item-category">{item.categoryName}</span>
+							{#if item.memo}
+								<span class="item-memo">{item.memo}</span>
+							{/if}
+						</div>
+						<span class="item-amount">{formatCurrency(item.amount)}</span>
+					</div>
+					<div class="item-actions">
+						<button type="button" class="item-delete" onclick={() => onremove(item.id)}>
+							<Trash2 size={20} />
+						</button>
+					</div>
 				</div>
-				<div class="item-info">
-					<span class="item-category">{item.categoryName}</span>
-					{#if item.memo}
-						<span class="item-memo">{item.memo}</span>
-					{/if}
-				</div>
-				<span class="item-amount">{formatCurrency(item.amount)}</span>
-				<button type="button" class="item-delete" onclick={() => onremove(item.id)}>
-					<Trash2 size={16} />
-				</button>
 			</li>
 		{/each}
 	</ul>
@@ -78,16 +87,37 @@
 		gap: 0.25rem;
 	}
 
+	/* 明細アイテムコンテナ (スワイプ用) */
+	.line-item-container {
+		border-radius: 0.75rem;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.scroll-container {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		height: 100%;
+	}
+
+	.scroll-container::-webkit-scrollbar {
+		display: none;
+	}
+
 	/* 明細アイテム */
 	.line-item {
+		flex: 0 0 100%;
+		scroll-snap-align: start;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem;
 		background-color: var(--color-surface-alt);
-		border-radius: 0.75rem;
 		transition: background-color 0.15s;
-		min-height: 3rem;
+		min-height: 3.5rem;
 	}
 
 	.line-item.clickable {
@@ -135,18 +165,26 @@
 		white-space: nowrap;
 	}
 
+	/* アクション領域 */
+	.item-actions {
+		flex: 0 0 4.5rem;
+		scroll-snap-align: end;
+		display: flex;
+		align-items: stretch;
+		background-color: #ef4444; /* tailwind red-500 */
+	}
+
 	/* 削除ボタン */
 	.item-delete {
+		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.25rem;
 		background: none;
 		border: none;
-		color: var(--color-text-muted);
+		color: white;
 		cursor: pointer;
-		flex-shrink: 0;
-		opacity: 0.5;
+		padding: 0;
 		transition: opacity 0.15s;
 	}
 

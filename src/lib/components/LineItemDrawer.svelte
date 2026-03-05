@@ -2,6 +2,7 @@
 	import CategoryGrid from './CategoryGrid.svelte';
 	import NumPad from './NumPad.svelte';
 	import { focusTrap } from '$lib/actions/focusTrap';
+	import { userPreferences } from '$lib/stores/preferences';
 
 	interface Category {
 		id: string;
@@ -24,25 +25,53 @@
 			memo: string;
 			amount: number;
 		} | null;
+		/** 初期選択するカテゴリー（Quick Add用） */
+		initialCategory?: Category | null;
 		/** 明細保存（追加・更新）時のコールバック */
-		onsave: (data: {
-			categoryId: string;
-			categoryName: string;
-			categoryIcon: string;
-			categoryColor: string;
-			memo: string;
-			amount: number;
-		}) => void;
+		onsave: (
+			data: {
+				categoryId: string;
+				categoryName: string;
+				categoryIcon: string;
+				categoryColor: string;
+				memo: string;
+				amount: number;
+			},
+			continuous: boolean
+		) => void;
 		/** 閉じる時のコールバック */
 		onclose: () => void;
 	}
 
-	const { open, categories, editItem = null, onsave, onclose }: Props = $props();
+	const {
+		open,
+		categories,
+		editItem = null,
+		initialCategory = null,
+		onsave,
+		onclose
+	}: Props = $props();
 
 	/* フォームステート */
 	let selectedCategory: Category | null = $state(null);
 	let amount: number = $state(0);
 	let memo: string = $state('');
+	let continuousInput: boolean = $state(false);
+	let memoInput: HTMLTextAreaElement | undefined = $state();
+
+	// クライアントサイドでのみローカルストレージから初期値を復元
+	import { onMount } from 'svelte';
+	onMount(() => {
+		const stored = localStorage.getItem('kakeibo_continuous_input');
+		if (stored) {
+			continuousInput = stored === 'true';
+		}
+	});
+
+	// 状態が変わるたびに保存
+	$effect(() => {
+		localStorage.setItem('kakeibo_continuous_input', String(continuousInput));
+	});
 
 	// open に応じたフォーム初期化
 	$effect(() => {
@@ -56,8 +85,19 @@
 				};
 				amount = editItem.amount;
 				memo = editItem.memo;
+			} else if (initialCategory) {
+				selectedCategory = initialCategory;
+				amount = 0;
+				memo = '';
 			} else {
 				resetForm();
+			}
+
+			// オプションが有効ならメモ欄にフォーカスを当てる
+			if ($userPreferences.autoFocusMemo) {
+				setTimeout(() => {
+					memoInput?.focus();
+				}, 50); // アニメーションとfocusTrapの初期化を待機
 			}
 		}
 	});
@@ -72,15 +112,26 @@
 	/** 保存ボタン押下 */
 	function handleSave() {
 		if (!selectedCategory || amount <= 0) return;
-		onsave({
-			categoryId: selectedCategory.id,
-			categoryName: selectedCategory.name,
-			categoryIcon: selectedCategory.icon,
-			categoryColor: selectedCategory.color,
-			memo,
-			amount
-		});
-		resetForm();
+		onsave(
+			{
+				categoryId: selectedCategory.id,
+				categoryName: selectedCategory.name,
+				categoryIcon: selectedCategory.icon,
+				categoryColor: selectedCategory.color,
+				memo,
+				amount
+			},
+			continuousInput && !isEdit
+		);
+
+		if (continuousInput && !isEdit) {
+			amount = 0;
+			memo = '';
+			// selectedCategory は保持して連続入力をスムーズに
+		} else {
+			resetForm();
+			// continuousInput の状態は保持する
+		}
 	}
 
 	/** 閉じるボタン押下 */
@@ -103,8 +154,8 @@
 		<div class="drawer-handle"></div>
 
 		<!-- カテゴリー選択 -->
-		<section class="drawer-section">
-			<h3 class="section-title">カテゴリー</h3>
+		<section class="drawer-section category-section">
+			<h3 class="section-title sticky-title">カテゴリー</h3>
 			<CategoryGrid
 				{categories}
 				selectedId={selectedCategory?.id ?? null}
@@ -115,7 +166,13 @@
 		<!-- メモ入力 -->
 		<section class="drawer-section">
 			<h3 class="section-title">メモ</h3>
-			<textarea class="memo-input" bind:value={memo} placeholder="メモ（任意）" rows="2"></textarea>
+			<textarea
+				bind:this={memoInput}
+				class="memo-input"
+				bind:value={memo}
+				placeholder="メモ（任意）"
+				rows="2"
+			></textarea>
 		</section>
 
 		<!-- 金額入力 -->
@@ -125,11 +182,21 @@
 		</section>
 
 		<!-- アクションボタン -->
-		<div class="drawer-actions">
-			<button type="button" class="btn btn-cancel" onclick={handleClose}>キャンセル</button>
-			<button type="button" class="btn btn-save" disabled={!canSave} onclick={handleSave}>
-				{isEdit ? '更新' : '追加'}
-			</button>
+		<div class="drawer-actions-wrapper">
+			{#if !isEdit}
+				<div class="continuous-input-row">
+					<label class="continuous-label">
+						<input type="checkbox" bind:checked={continuousInput} />
+						<span class="checkbox-text">続けて入力する</span>
+					</label>
+				</div>
+			{/if}
+			<div class="drawer-actions">
+				<button type="button" class="btn btn-cancel" onclick={handleClose}>キャンセル</button>
+				<button type="button" class="btn btn-save" disabled={!canSave} onclick={handleSave}>
+					{isEdit ? '更新' : '追加'}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -154,11 +221,13 @@
 		z-index: 70;
 		width: 100%;
 		max-width: var(--spacing-app-max-width);
-		max-height: 85dvh;
-		overflow-y: auto;
+		max-height: 90dvh;
+		display: flex;
+		flex-direction: column;
+		overflow-y: auto; /* Fallback for very short screens */
 		background-color: var(--color-surface);
 		border-radius: 1rem 1rem 0 0;
-		padding: 0.5rem 1rem 1.5rem;
+		padding: 0.25rem 0.75rem 1rem;
 		animation: slide-up 0.25s ease;
 	}
 
@@ -168,21 +237,49 @@
 		height: 0.25rem;
 		background-color: var(--color-border);
 		border-radius: 0.125rem;
-		margin: 0 auto 0.75rem;
+		margin: 0.25rem auto 0.5rem;
+		flex-shrink: 0;
 	}
 
 	/* セクション */
 	.drawer-section {
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
+		flex-shrink: 0;
+	}
+
+	.category-section {
+		flex: 1;
+		min-height: 6.5rem; /* Ensure at least one row of categories + padding is visible */
+		overflow-y: auto;
+		/* スクロールバーを見えにくくする対応 */
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+		margin-left: -0.75rem;
+		margin-right: -0.75rem;
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+	}
+
+	.category-section::-webkit-scrollbar {
+		display: none;
 	}
 
 	.section-title {
-		font-size: 0.75rem;
+		font-size: 0.6875rem;
 		font-weight: 600;
 		color: var(--color-text-muted);
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.375rem;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
+	}
+
+	.sticky-title {
+		position: sticky;
+		top: 0;
+		background-color: var(--color-surface);
+		padding-top: 0.125rem;
+		padding-bottom: 0.125rem;
+		z-index: 2;
 	}
 
 	/* メモ入力 */
@@ -203,19 +300,47 @@
 	}
 
 	/* アクションボタン */
-	.drawer-actions {
+	.drawer-actions-wrapper {
 		display: flex;
-		gap: 0.75rem;
+		flex-direction: column;
+		gap: 0.5rem;
 		margin-top: 0.5rem;
 	}
 
+	.continuous-input-row {
+		display: flex;
+		justify-content: flex-end;
+		padding: 0 0.5rem;
+	}
+
+	.continuous-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--color-text);
+		cursor: pointer;
+	}
+
+	.continuous-label input[type='checkbox'] {
+		width: 1.125rem;
+		height: 1.125rem;
+		accent-color: var(--color-primary-500);
+		cursor: pointer;
+	}
+
+	.drawer-actions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+	}
+
 	.btn {
-		flex: 1;
-		padding: 0.75rem;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 0.9375rem;
+		padding: 0.875rem;
+		border-radius: 0.75rem;
 		font-weight: 600;
+		font-size: 1rem;
+		border: none;
 		cursor: pointer;
 		transition:
 			background-color 0.15s,
